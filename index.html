@@ -118,7 +118,7 @@
                     <div v-for="product in sortedProducts" :key="product.id" class="product-card">
                         <h2><i :class="product.icon"></i> {{ product.subject }}</h2>
                         <figure>
-                            <img v-bind:src="'/images/' + product.image" alt="Product Image" width="100" />
+                            <img v-bind:src="product.image" alt="Product Image" width="100" />
                         </figure>
                         <p>{{ product.location }}</p>
                         <p>Price: {{ product.price }}</p>
@@ -188,6 +188,9 @@
                             _id: product._id,
                             spaces: Number(product.spaces)  // 👈 ensure spaces is numeric
                         }));
+                        this.products.forEach(product => {
+                console.log('Image URL:', '/images/' + product.image);
+            });
                     })
                     .catch(error => {
                         console.error('Error fetching products:', error);
