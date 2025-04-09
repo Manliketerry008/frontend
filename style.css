@@ -1,0 +1,147 @@
+/* General Body Style */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #ADD8E6;  /* Light blue background */
+}
+
+/* Header Styling */
+header {
+    background-color: #333;
+    color: white;
+    padding: 15px;
+    text-align: center;
+}
+
+/* Change the color of the h1 tag (Lessons text) to black */
+header h1 {
+    color: black;  /* Black color for the header text */
+}
+
+/* Sorting Controls */
+.sorting-controls {
+    margin: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Product Container */
+.product-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;  /* Centers the items and allows them to wrap */
+    gap: 20px;  /* Adds spacing between product cards */
+    padding: 20px;
+    width: 100%;
+}
+
+/* Product Card Style */
+.product-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 250px;
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden; /* Ensure images don't overflow out of the card */
+}
+
+/* Hover Effect on Product Cards */
+.product-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Product Image Styling */
+.product-card img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+/* Product Title */
+.product-card h2 {
+    font-size: 1.5em;
+    color: #333;
+    margin: 15px 0;
+    font-weight: bold;
+}
+
+/* Product Description */
+.product-card p {
+    font-size: 1em;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+/* Product Button Styling */
+.product-card button {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+/* Hover Effect on Button */
+.product-card button:hover {
+    background-color: #218838;
+}
+
+/* Disabled Button State */
+.product-card button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Rating Section */
+.product-card .rating {
+    margin-top: 10px;
+    font-size: 1.2em;
+}
+
+.product-card .rating span {
+    color: gold;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 1024px) {
+    .product-container {
+        justify-content: space-evenly;  /* Space between items with even distribution */
+    }
+
+    .product-card {
+        width: 45%;  /* Use 45% of the width for medium-sized screens */
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .product-container {
+        justify-content: center; /* Center the products on smaller screens */
+    }
+
+    .product-card {
+        width: 90%; /* Make product cards take up most of the width */
+        max-width: 320px; /* Optional max width */
+    }
+
+    .product-card img {
+        max-height: 200px; /* Optional max-height for images */
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .product-card {
+        width: 100%;  /* Full width for very small screens (mobile) */
+    }
+
+    .product-card img {
+        max-height: 150px; /* Smaller max-height for very small screens */
+    }
+}

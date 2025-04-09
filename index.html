@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Lesson</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="products.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        header {
+            background-color: #f4f4f4;
+            width: 100%;
+            padding: 10px;
+            text-align: center;
+        }
+        .sorting-controls {
+            margin: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .sorting-controls select, .sorting-controls button {
+            margin: 0 10px;
+        }
+        .product-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+            width: 100%;
+        }
+        .product-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            max-width: 250px;
+            padding: 15px;
+            text-align: center;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .product-card h2 {
+            margin-bottom: 10px;
+        }
+        .product-card p {
+            margin: 5px 0;
+        }
+        .product-card button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .product-card button:disabled {
+            background-color: #ccc;
+        }
+        .product-card .fa-cart-plus {
+            margin-left: 5px;
+        }
+        .checkout-form input {
+            margin: 5px 0;
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+            border-radius: 4px;
+        }
+        .checkout-form button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .checkout-form button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1 v-text="sitename"></h1>
+            <button v-on:click="showCheckout">
+                {{ cartItemCount }} <span class="fas fa-cart-plus"></span> Checkout
+            </button>
+        </header>
+
+        <main>
+            <!-- Sorting Controls -->
+            <div class="sorting-controls">
+                <label for="sortCriteria">Sort By:</label>
+                <select v-model="sortCriteria" id="sortCriteria">
+                    <option value="price">Price</option>
+                    <option value="rating">Rating</option>
+                    <option value="subject">Subject</option>
+                </select>
+                <button @click="toggleSort">
+                    Sort Order: {{ sortOrder === 'asc' ? 'Ascending' : 'Descending' }}
+                </button>
+            </div>
+
+            <!-- Product Display Section -->
+            <div v-if="showProduct">
+                <div class="product-container">
+                    <div v-for="product in sortedProducts" :key="product.id" class="product-card">
+                        <h2><i :class="product.icon"></i> {{ product.subject }}</h2>
+                        <figure>
+                            <img v-bind:src="'/images/' + product.image" alt="Product Image" width="100" />
+                        </figure>
+                        <p>{{ product.location }}</p>
+                        <p>Price: {{ product.price }}</p>
+                        <p>Spaces Available: {{ product.spaces - cartCount(product.id) }}</p>
+                        <button @click="addToCart(product)" v-if="canAddToCart(product)">Add to cart</button>
+                        <button v-else disabled>Add to cart</button>
+                        <span v-if="product.spaces === cartCount(product.id)">All out!</span>
+                        <div>
+                            <span v-for="n in product.rating">★</span>
+                            <span v-for="n in 5 - product.rating">☆</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Checkout Section -->
+            <!-- Checkout Section -->
+<div v-else class="checkout-form">
+    <h2>Checkout</h2>
+
+    <!-- 🛒 Cart Summary with Remove Button -->
+    <h3>Your Cart</h3>
+    <ul>
+        <li v-for="(count, id) in groupedCart" :key="id">
+            {{ productNameById(id) }} × {{ count }}
+            <button @click="removeFromCart(id)" style="margin-left: 10px; background-color: red;">
+                Remove
+            </button>
+        </li>
+    </ul>
+
+    <p><strong>First Name:</strong> <input v-model.trim="order.firstName" /></p>
+    <p><strong>Last Name:</strong> <input v-model.trim="order.lastName" /></p>
+    <p><strong>Phone number:</strong> <input v-model.number="order.phone" type="number" /></p>
+    <p><strong>Method:</strong> <input v-model="order.method" placeholder="Enter payment method" /></p>
+
+    <button @click="submitForm">Place Order</button>
+</div>
+
+        </main>
+    </div>
+
+    <script type="text/javascript">
+        var webstore = new Vue({
+            el: '#app',
+            data: {
+                sitename: 'Lessons',
+                products: [],
+                cart: [],
+                showProduct: true,
+                order: {
+                    firstName: '',
+                    lastName: '',
+                    phone: '',
+                    method: ''
+                },
+                sortCriteria: 'price',
+                sortOrder: 'asc'
+            },
+            mounted() {
+                fetch('https://backend-sb5d.onrender.com/collection/Lessons')
+                    .then(response => response.json())
+                    .then(data => {
+                        this.products = data.map(product => ({
+                            ...product,
+                            id: product.id,
+                            _id: product._id,
+                            spaces: Number(product.spaces)  // 👈 ensure spaces is numeric
+                        }));
+                    })
+                    .catch(error => {
+                        console.error('Error fetching products:', error);
+                    });
+            },
+            methods: {
+                addToCart(product) {
+                    this.cart.push(product.id);
+                },
+                showCheckout() {
+                    this.showProduct = !this.showProduct;
+                },
+                canAddToCart(product) {
+                    return product.spaces > this.cartCount(product.id);
+                },
+                cartCount(id) {
+                    return this.cart.filter(item => item === id).length;
+                },
+                toggleSort() {
+                    this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+                },
+                productNameById(id) {
+                    const product = this.products.find(p => p.id === parseInt(id));
+                    return product ? product.subject : 'Unknown Product';
+                },
+                removeFromCart(id) {
+    const index = this.cart.indexOf(parseInt(id));
+    if (index !== -1) {
+        this.cart.splice(index, 1);
+    }
+},
+                submitForm() {
+                    const orderedProductCounts = {};
+                    this.cart.forEach(id => {
+                        if (orderedProductCounts[id]) {
+                            orderedProductCounts[id]++;
+                        } else {
+                            orderedProductCounts[id] = 1;
+                        }
+                    });
+
+                    fetch('https://backend-sb5d.onrender.com/collection/Orders', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            ...this.order,
+                            cart: this.cart
+                        })
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Failed to submit order');
+                        return response.json();
+                    })
+                    .then(data => {
+                        alert('Order submitted! ID: ' + data.insertedId);
+
+                        Object.entries(orderedProductCounts).forEach(([productId, quantity]) => {
+                            const product = this.products.find(p => p.id === parseInt(productId));
+                            if (product && product._id) {
+                                const newSpaces = product.spaces - quantity;
+                                const numericSpaces = parseInt(newSpaces, 10);  // ✅ Ensure it's a number
+                                console.log(`Updating ${product.subject} with spaces:`, numericSpaces, typeof numericSpaces);
+
+                                fetch(`https://backend-sb5d.onrender.com/collection/Lessons/${product._id}`, {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ spaces: numericSpaces })
+                                })
+                                .then(res => res.json())
+                                .then(updateData => {
+                                    console.log(`Product ${product._id} updated:`, updateData);
+                                })
+                                .catch(err => console.error(`Error updating product ${product._id}:`, err));
+                            }
+                        });
+
+                        this.cart = [];
+                        this.order = { firstName: '', lastName: '', phone: '', method: '' };
+                        this.showProduct = true;
+                    })
+                    .catch(err => {
+                        console.error('Order error:', err);
+                        alert('Failed to place order.');
+                    });
+                }
+            },
+            computed: {
+                cartItemCount() {
+                    return this.cart.length;
+                },
+                groupedCart() {
+                    return this.cart.reduce((acc, id) => {
+                        acc[id] = (acc[id] || 0) + 1;
+                        return acc;
+                    }, {});
+                },
+                sortedProducts() {
+                    let productsArray = [...this.products];
+                    productsArray.sort((a, b) => {
+                        let comparison = 0;
+                        if (this.sortCriteria === 'price') {
+                            comparison = a.price - b.price;
+                        } else if (this.sortCriteria === 'rating') {
+                            comparison = a.rating - b.rating;
+                        } else if (this.sortCriteria === 'subject') {
+                            comparison = a.subject.localeCompare(b.subject);
+                        }
+                        return this.sortOrder === 'asc' ? comparison : -comparison;
+                    });
+                    return productsArray;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
